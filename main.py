@@ -1,42 +1,77 @@
+import matplotlib.pyplot as plt
+import numpy as np 
 import csv
 from tkinter import * 
 from tkinter import ttk 
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
-def calculate(*args):
-    try:
-        value = float(feet.get())
-        meters.set(int(0.3048 * value * 10000.0 + 0.5) / 10000.0)
-    except ValueError:
-        pass 
+root = Tk()
+root.title("Budget Tracker")
 
-window = Tk()
-window.title("Budget Tracker")
-
-mainframe = ttk.Frame(window, padding="3 3 12 12")
+mainframe = ttk.Frame(root, padding="10")
 mainframe.grid(column=0, row=0, sticky=(N, W, E, S))
-window.columnconfigure(0, weight=1)
-window.rowconfigure(0, weight=1)
+root.columnconfigure(0, weight=1)
+root.rowconfigure(0, weight=1)
 
-feet = StringVar()
-feet_entry = ttk.Entry(mainframe, width=7, textvariable=feet)
-feet_entry.grid(column=2, row=1, sticky=(W, E))
+# Variables
+name = StringVar()
+income = StringVar()
+category = []
+percentage = []
+categories = []
+percentages = [] 
 
-meters = StringVar()
-ttk.Label(mainframe, textvariable=meters).grid(column=2, row=2, sticky=(W, E))
+fig, ax = plt.subplots(figsize=(4,4))
+canvas = FigureCanvasTkAgg(fig, master=mainframe)
+canvas.get_tk_widget().grid(column=4, row=1, rowspan=10, padx=10, pady=10)
 
-ttk.Button(mainframe, text="Calculate", command=calculate).grid(column=3, row=3, sticky=W)
+def add_category(): 
+    row = len(category) + 3 
+    cat = StringVar()
+    perc = StringVar()
+    category.append(cat)
+    percentage.append(perc)
 
-ttk.Label(mainframe, text="feet").grid(column=3, row=1, sticky=W)
-ttk.Label(mainframe, text="is equivalent to").grid(column=1, row=2, sticky=E)
-ttk.Label(mainframe, text="meters").grid(column=3, row=2, sticky=W)
+    cat_entry = ttk.Entry(mainframe, width=15, textvariable=cat)
+    perc_entry = ttk.Entry(mainframe, width=15, textvariable=perc)
+    cat_entry.grid(column=1, row=row, sticky=W)
+    perc_entry.grid(column=2, row=row, sticky=W)
 
-for child in mainframe.winfo_children(): 
+    categories.append(cat_entry)
+    percentages.append(perc_entry)
+
+def submit_budget():
+    categories = [var.get() for var in category]
+    percentages = [] 
+    try:
+        for var in percentage:
+            percentages.append(float(var.get()))
+    except ValueError:
+        print("Invalid percentage point")
+        return
+    
+    ax.clear()
+
+    ax.pie(percentages, labels=categories, autopct='%1.1f%%')
+    canvas.draw()
+
+ttk.Label(mainframe, text="Name: ").grid(column=1, row=1, sticky=E)
+ttk.Entry(mainframe, width=20, textvariable=name).grid(column=2, row=1, sticky=(W, E))
+
+ttk.Label(mainframe, text="Income: ").grid(column=1, row=2, sticky=E)
+ttk.Entry(mainframe, width=20, textvariable=income).grid(column=2, row=2, sticky=(W, E))
+
+ttk.Button(mainframe, text="Add category", command=add_category).grid(column=1, row=20, sticky=W)
+ttk.Button(mainframe, text="Submit budget", command=submit_budget).grid(column=2, row=20, sticky=W)
+
+add_category()
+add_category()
+
+for child in mainframe.winfo_children():
     child.grid_configure(padx=5, pady=5)
 
-feet_entry.focus()
-window.bind("<Return>", calculate)
+root.mainloop()
 
-window.mainloop()
 
 # run upon intial opening of the budget tracker, or upon editing information 
 def set_up(): 
@@ -52,6 +87,17 @@ def set_up():
     for c in range(int(limit)): 
         category = input("Enter category: ")
         categories.append(category)
+
+    percentages = [] 
+    remain_percent = 100
+    for c in categories:
+        percentage = input(f"Enter budget percentage for {c} ({remain_percent}% remaining): ")
+        remain_percent = remain_percent - int(percentage) 
+        percentages.append(int(percentage))
+
+    y = np.array(percentages)
+    ax.pie(y, labels=categories)
+    canvas.draw()
 
 # create a function that asks a user to input their expense
 # amount | date | description | category 
