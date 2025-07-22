@@ -1,0 +1,29 @@
+{
+    "name": "Carlie",
+    "period": "monthly",
+    "income": "1000",
+    "categories": [
+        "Testing1",
+        "Testing2"
+    ],
+    "dollars": [
+        500.0,
+        469.55
+    ],
+    "allotments": [
+        500.0,
+        500.0
+    ],
+    "percentages": [
+        50.0,
+        50.0
+    ],
+    "expenses": [
+        {
+            "date": "7/1/2025",
+            "amount": 30.45,
+            "category": "Testing2",
+            "notes": ""
+        }
+    ]
+}
